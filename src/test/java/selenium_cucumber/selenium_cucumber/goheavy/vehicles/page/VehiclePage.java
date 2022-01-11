@@ -1,15 +1,23 @@
 package selenium_cucumber.selenium_cucumber.goheavy.vehicles.page;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
 import selenium_cucumber.selenium_cucumber.general.PageObject;
 import selenium_cucumber.selenium_cucumber.general.Setup;
 
@@ -163,15 +171,24 @@ public class VehiclePage extends PageObject {
             return false;
         }
     }
+    public void clickOnElement(WebElement element, boolean waitForSpinner) {
+        if (waitForSpinner)
+            waitForSpinningElementDissapear();
+        Setup.getActions().moveToElement(element).build().perform();
+        Setup.getActions().click(element).build().perform();
+        if (waitForSpinner)
+            waitForSpinningElementDissapear();
+    }
 
     public boolean clickOnAddVehicleButton() {
+        waitForSpinningElementDissapear();
         try {
             waitForSpinningElementDissapear();
             Setup.getWait().thread(1000);
-            WebElement element = getWebElement(By.xpath(getAddVehicleButtonXpath()));
-            clickOn(element);
+            clickOnElement(getWebElement(By.xpath("//span[text()='Add Vehicle']/ancestor::button[@type='button' and @class='ant-btn ant-btn-primary']")), true);
             return true;
-        } catch (Exception e) {
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
             return false;
         }
     }
@@ -196,7 +213,6 @@ public class VehiclePage extends PageObject {
                     getPageElementBy(By.xpath(getVehicleYearMakepath())));
             Assert.assertNotNull("Vehicle Sub Section not found",
                     getPageElementBy(By.xpath(getVehicleCapacitySubSectionXpath())));
-            //TODO: Work in progress check for every element on the page to be Expected
             return true;
         } catch (Exception e) {
             return false;
@@ -452,6 +468,62 @@ public class VehiclePage extends PageObject {
             System.out.println("Values previously entered in the VIN, and Vehicle Make fields by the current user are missing.");
             return false;
         }
+    }
+
+    public String systemDisplaysMessage_FailedUploadFiles(File file) {
+
+        waitForSpinningElementDissapear();
+        String xpath = "//div[@class='ant-notification ant-notification-topRight']";
+
+        WebElement alert = getWebElement(By.xpath(xpath));
+
+        Wait<WebDriver> mywait = new FluentWait<WebDriver>(Setup.getDriver())
+                .withTimeout(10, TimeUnit.SECONDS)
+                .pollingEvery(2, TimeUnit.SECONDS)
+                .ignoring(NoSuchElementException.class);
+
+        WebDriver driver = Setup.getDriver();
+        WebElement msg = mywait.until(new Function<WebDriver, WebElement>() {
+            @Override
+            public WebElement apply(WebDriver driver) {
+                Assert.assertNotNull(alert.getText());
+                return alert;
+            }
+        });
+        return msg.getText();
+    }
+
+    public void CheckUploadImageComponent(String fileInputButton, String nextBtn) {
+        waitForSpinningElementDissapear();
+        File invalid_file = new File("src/test/resources/doc.xlsx");
+        File exceeds_max = new File("src/test/resources/huge_image.png");
+        File valid_file_PNG = new File("src/test/resources/file2.jpg");
+        List<File> paths = new ArrayList<File>();
+        paths.add(invalid_file);
+        paths.add(exceeds_max);
+        paths.add(valid_file_PNG);
+        for (File file : paths) {
+            Setup.getDriver().findElement(By.xpath(fileInputButton)).sendKeys(file.getAbsolutePath());
+            Setup.getDriver().findElement(By.xpath(nextBtn)).click();
+
+            try {
+                if (file.getName().contains("JPG") && file.getName().contains("JPEG") && file.getName().contains("PNG")) {
+                    Assert.assertEquals(systemDisplaysMessage_FailedUploadFiles(file), "You can only upload JPG/JPEG/PNG files");
+                    if (file.length() >= 5242880) {
+                        Assert.assertEquals(systemDisplaysMessage_FailedUploadFiles(file), "The image must be smaller than 5 MB");
+                    } else {
+                        Assert.assertTrue(Setup.getDriver().findElement(By.xpath("//div[@class='styles__ImagePreviewActionsStyled-sc-1qjgkf9-12 kxeirt']")).isDisplayed());
+                        Assert.assertEquals(Setup.getDriver().findElement(By.xpath("//span[@class='styles__ItemStatusStyled-sc-1qjgkf9-14 gDWxff item-status']")).getText(),"Assessing");
+                    }
+
+                }
+            } catch (Exception e) {
+                Assert.fail(e.getMessage());
+            }
+
+
+        }
+
     }
 
 }

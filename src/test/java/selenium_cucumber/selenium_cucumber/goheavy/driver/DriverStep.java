@@ -11,6 +11,7 @@ import selenium_cucumber.selenium_cucumber.goheavy.driver.pages.DriverPage;
 public class DriverStep extends Steps{
 	private DriverPage driverListPage;
 	private DriverPage driverPage;
+	private String email;
 
 	public DriverStep() {
 
@@ -32,9 +33,9 @@ public class DriverStep extends Steps{
 		}
 	}
 
-	public void userClicksOnAddDriverButton() {
+	public void userClicksOnVehicles() {
 		try {
-			Assert.assertTrue(driverListPage.userClickOnAddDriver());
+			Assert.assertTrue(driverListPage.userClickOnVehicles());
 		} catch (Exception e) {
 			Assert.fail(e.getMessage());
 		}
@@ -48,14 +49,12 @@ public class DriverStep extends Steps{
 		}
 	}
 
-	public void user_inserts_valid_data_add() {
+	public String user_inserts_valid_data_add(){
+		Setup.getWait().thread(1500);
 		driverPage.clickOnElement(driverPage.getDriver().findElement(By.xpath("//span[text()='Add Driver']/ancestor::button[@class='ant-btn ant-btn-primary']")), true);
-		try {
-			Assert.assertTrue(driverListPage.userInsertsValidDataAdd());
-		} catch (Exception e) {
-			Assert.fail(e.getMessage());
+			String data = driverPage.userInsertsValidDataAdd();
+			return data;
 		}
-	}
 
 	public void system_creates_driver_on_status(String status) {
 		try {
@@ -118,9 +117,9 @@ public class DriverStep extends Steps{
 		}
 	}
 
-	public void user_search_for_added_driver(String fName) {
+	public void user_search_for_added_driver(String email) {
 		try {
-			driverListPage.searchForAddedDriver(fName);
+			driverListPage.searchForAddedDriver(email);
 		} catch (Exception e) {
 			Assert.fail(e.getMessage());
 		}

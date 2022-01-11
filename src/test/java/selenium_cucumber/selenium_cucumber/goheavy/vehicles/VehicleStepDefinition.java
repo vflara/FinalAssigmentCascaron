@@ -15,11 +15,7 @@ public class VehicleStepDefinition {
 
     @When("User clicks on \"Add Vehicle\" button.")
     public void the_user_clicks_on_add_vehicle_button() {
-        try {
             vehicleStep.userClicksOnAddVehicleButton();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
     }
 
     @Given("The system opens the \"Add Vehicle\" view.")
@@ -44,6 +40,7 @@ public class VehicleStepDefinition {
     public void the_user_inserts_valid_data_and_clicks_done_button() {
         try {
             vehicleStep.userInsertsValidDataAndClicksDone();
+            vehicleStep.clicks_button_done();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

@@ -4,10 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -176,17 +173,23 @@ public class PageObject {
         Setup.getWait().thread(150);
     }
 
-    public void sendDataToInput(WebElement element, String data, Keys key, String form) {
+    public void sendDataToInput(WebElement element, String data, Keys key) {
+        scrollByVisibleElement(element);
+
         try {
             if (element.getAttribute("value").length() > 0)
                 clear_element_text(element);
         } catch (Exception e) {
         }
-        scrollToWebElement(element, form);
+
         if (data != null)
             Setup.getActions().sendKeys(element, data).build().perform();
         else
             Setup.getActions().sendKeys(element, key).build().perform();
+    }
+    public void scrollByVisibleElement(WebElement element) {
+        JavascriptExecutor js = (JavascriptExecutor) Setup.getDriver();
+        js.executeScript("arguments[0].scrollIntoView();", element);
     }
 
     public  void scrollToWebElement(WebElement element, String form) {

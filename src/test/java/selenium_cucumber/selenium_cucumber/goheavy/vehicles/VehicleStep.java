@@ -31,11 +31,7 @@ public class VehicleStep extends Steps {
     }
 
     public void userClicksOnAddVehicleButton() {
-        try {
-            Assert.assertTrue(vehiclePage.clickOnAddVehicleButton());
-        } catch (Exception e) {
-            Assert.fail(e.getMessage());
-        }
+        vehiclePage.clickOnAddVehicleButton();
     }
 
     public void theSystemOpensTheAddVehicleView() {

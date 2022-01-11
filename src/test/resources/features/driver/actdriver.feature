@@ -7,7 +7,8 @@ Feature: Activate Driver
     Given Any "GoHeavy Admin / Fleet Owner" is logged
     Given The user is in "Drivers List" view.
     Given User Add a "Driver" from Drivers List
-    Given User Add a "Vehicle" from Vehicles & Insurance List
+    Given User Add a "Vehicle"
+    Given User go to "Documents"
     Given User approves "Documents"
 
   Scenario: Activate Goheavy Driver

@@ -6,14 +6,28 @@ import selenium_cucumber.selenium_cucumber.general.Setup;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class VehicleFeaturesPage extends TabsPage {
-    private String stepTwoFormScroll;
+    private String stepTwoFormScroll = "//*[@id='step-one-form']/ancestor::div["
+            + "@class='templateStyles__ContentDiv-sc-144t9h2-1 bcVeZj']";;
     private String vehiclePhotoImageXpath;
+
+    By vehicleModelLocator = By.id("model");
+    By vehicleColorLocator = By.id("color");
+    By vehicleTrimLocator = By.id("trim");
+    By vehicleTransmissionLocator = By.id("transmission");
+    String path = "/ancestor::div[contains(@class,'ant-form-item')]/descendant::div[@role='alert']";
+    By vehicleModelErrorSMSLocator = By.xpath("//input[@id='model']"+path);
+    By vehicleColorErrorSMSLocator = By.xpath("//input[@id='color']"+path);
+    By vehicleTrimErrorSMSLocator = By.xpath("//input[@id='trim']"+path);
+    By vehicleTransmissionErrorSMSLocator = By.xpath("//input[@id='transmission']"+path);
+    DrivingRequirementsPage drivingRequirementsPage;
+    String uploadInputButton = "//input[@type='file']";
+    //String uploadNextButton = "//button[@type='submit']";
+    String uploadNextButton = "//button[@type='submit']/descendant::span[text()='Next']";
 
     public VehicleFeaturesPage() {
         super();
-        setVehiclePhotoImageXpath("//label[@class='ant-form-item-required' and "
-                + "@title='Vehicle Photo (from front driver side angle)']/ancestor::div[@class='ant-row ant-form-item']/"
-                + "descendant::input[@type='file']");
+        drivingRequirementsPage = new DrivingRequirementsPage();
+        setVehiclePhotoImageXpath("//input[@type='file']");
         setStepTwoFormScroll("//*[@id='step-two-form']/ancestor::div[@class='templateStyles__ContentDiv-sc-144t9h2-1 bcVeZj']");
     }
 
@@ -34,39 +48,42 @@ public class VehicleFeaturesPage extends TabsPage {
     }
 
     public void insertValidData() {
+
         int min_val = 1995;
         int max_val = 2018;
 
         ThreadLocalRandom tlr = ThreadLocalRandom.current();
         int randomNum = tlr.nextInt(min_val, max_val + 1);
-        sendDataToInput(getWebElement(By.id("vehicleTypeId")),
+        sendDataToInput(getWebElement(By.id("model")),
                 getFaker().artist().name(), null, getStepTwoFormScroll());
 
-        sendDataToInput(getWebElement(By.xpath("//input[@id='color' and @placeholder='Enter Vehicle color']")),
+        sendDataToInput(getWebElement(By.id("color")),
                 getFaker().color().name().toUpperCase(), null, getStepTwoFormScroll());
 
-        sendDataToInput(getWebElement(By.xpath("//input[@id='trim' and @placeholder='Enter Vehicle trim']")),
+        sendDataToInput(getWebElement(By.id("trim")),
                 getFaker().name().firstName(), null, getStepTwoFormScroll());
 
-        sendDataToInput(getWebElement(By.xpath("//input[@id='transmission' and @placeholder='Enter Vehicle transmission']")),
+        sendDataToInput(getWebElement(By.id("transmission")),
                 getFaker().name().firstName(), null, getStepTwoFormScroll());
-
         if (min_val < 145)
-            clickOn(getWebElement(By.xpath("//label[text()='Towing Kit Installed']/ancestor::div["
-                    + "@class='ant-row ant-form-item']/descendant::button[@type='button' and @class='ant-switch']")));
+            clickOn(getWebElement(By.xpath("//label[@title='Towing Kit Installed']/ancestor::" +
+                    "div[@class='ant-row ant-form-item']/descendant::button[@type='button']")));
 
         if (randomNum % 2 == 0)
-            clickOn(getWebElement(By.xpath("//label[text()='Liftgate Installed']/ancestor::div["
-                    + "@class='ant-row ant-form-item']/descendant::button[@type='button' and @class='ant-switch']")));
-
-        setImage(getWebElement(By.xpath(getVehiclePhotoImageXpath())), null);
+            clickOn(getWebElement(By.xpath("//label[@title='Liftgate Installed']/ancestor::" +
+                    "div[@class='ant-row ant-form-item']/descendant::button[@type='button']")));
 
         scrollToWebElement(null, getStepTwoFormScroll());
 
-        clickOn(getWebElement(By.xpath("//button[@type='submit']/descendant::span[text()='Next']")));
+        CheckUploadImageComponent(uploadInputButton,uploadNextButton);
+
         waitForSpinningElementDissapear();
         Setup.getWait().thread(1500);
     }
 
 
+
+    public boolean systemOpensAddVehicleView() {
+        return true;
+    }
 }

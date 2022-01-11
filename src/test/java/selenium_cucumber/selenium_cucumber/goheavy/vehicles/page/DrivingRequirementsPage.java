@@ -1,5 +1,6 @@
 package selenium_cucumber.selenium_cucumber.goheavy.vehicles.page;
 
+import net.bytebuddy.asm.Advice;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -14,14 +15,29 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class DrivingRequirementsPage extends TabsPage {
 
-    private String vehicleInsuranceImageXpath = "//label[@class='ant-form-item-required' and "
-            + "@title='Current Insurance Certificate Picture']/ancestor::div[@class='ant-row ant-form-item']/descendant::input"
-            + "[@type='file']";
-    private String stepThreeFormScroll = "//*[@id='step-three-form']/ancestor::div["
-            + "@class='templateStyles__ContentDiv-sc-144t9h2-1 bcVeZj']";
+    private String vehicleInsuranceImageXpath = "//label[@title='Current Insurance Certificate Picture']/ancestor::" +
+            "div[@class='ant-row ant-form-item']/descendant::input[@type='file']";
+    private String stepThreeForm = "//*[@id='step-three-form']/" +
+            "ancestor::div[@class='templateStyles__ContentDiv-sc-144t9h2-1 bcVeZj']";
+    By getVehicleLicensePlateLocator = By.id("licensePlateStateIssuedId");
+
+    By insurancePolicyLocator = By.id("insurancePolicyNo");
+    By insuranceCertificateLocator = By.id("insuranceCertificateCompany");
+    By insuranceRenewalLocator = By.id("insuranceRenewal");
+    By vehicleLicensePlateLocator = By.id("licensePlateNo");
+    String path = "/ancestor::div[contains(@class,'ant-form-item')]/descendant::div[@role='alert']";
+    By insurancePolicyErrorSMSLocator = By.xpath("//input[@id='insurancePolicyNo']"+path);
+    By insuranceCertificateErrorSMSLocator = By.xpath("//input[@id='insuranceCertificateCompany']"+path);
+    By insuranceRenewalErrorSMSLocator = By.xpath("//input[@id='insuranceRenewal']"+path);
+    By vehicleLicensePlateErrorSMSLocator = By.xpath("//input[@id='licensePlateNo']"+path);
+    String uploadInputButton_CICP = "//label[text()='Current Insurance Certificate Picture']/ancestor::div[contains(@class,'ant-form-item')]/descendant::input[@type='file']";
+    String uploadInputButton_LPP = "//label[text()='License Plate Photo']/ancestor::div[contains(@class,'ant-form-item')]/descendant::input[@type='file']";
+    String uploadInputButton_VRS = "//label[text()='Vehicle Registration Sticker']/ancestor::div[contains(@class,'ant-form-item')]/descendant::input[@type='file']";
+    String doneButton = "//button[@type='submit']/descendant::span[text()='Done']";
 
     public DrivingRequirementsPage() {
         super();
+
 
     }
 
@@ -29,29 +45,59 @@ public class DrivingRequirementsPage extends TabsPage {
         return vehicleInsuranceImageXpath;
     }
 
-    private String getStepThreeFormScroll() {
-        return stepThreeFormScroll;
+    public String getStepThreeForm() {
+        return stepThreeForm;
+    }
+
+    public void setStepThreeForm(String stepThreeForm) {
+        this.stepThreeForm = stepThreeForm;
+    }
+
+    public void insertValidData() {
+        //setImage(getWebElement(By.xpath(getVehicleInsuranceImageXpath())), null);
+
+        clickOn(getWebElement(By.id("verificationDelivery")));
+        clickOn(getWebElement(By.id("verificationLicenseTime")));
+
+        sendDataToInput(getWebElement(By.id("insurancePolicyNo")),
+                getFaker().number().digits(12), null, getStepThreeForm());
+
+        Setup.getWait().thread(500);
+
+        sendDataToInput(getWebElement(By.id("insuranceCertificateCompany")),
+                getFaker().name().firstName(), null, getStepThreeForm());
+
+        Setup.getWait().thread(500);
+
+        introduceDate();
+
+        Setup.getWait().thread(500);
+
+        Setup.getActions().moveToElement(getWebElement(By.id("insuranceRenewal"))).build().perform();
+        Setup.getActions().click(getWebElement(By.id("insuranceRenewal")));
+        sendDataToInput(getWebElement(By.id("insuranceRenewal")),
+                getFaker().name().firstName(), null, getStepThreeForm());
+
+        Setup.getWait().thread(500);
+
+        sendDataToInput(getWebElement(By.id("licensePlateNo")),
+                getFaker().number().digits(6), null, getStepThreeForm());
+        Setup.getWait().thread(500);
+
+        managePlateState();
+
+        scrollToWebElement(null, getStepThreeForm());
+
+        Setup.getWait().thread(500);
+
+        CheckUploadImageComponent(uploadInputButton_CICP, doneButton);
+        CheckUploadImageComponent(uploadInputButton_LPP, doneButton);
+        CheckUploadImageComponent(uploadInputButton_VRS, doneButton);
     }
 
 
-    public void insertValidData() {
-        setImage(getWebElement(By.xpath(getVehicleInsuranceImageXpath())), null);
 
-        clickOn(getWebElement(By.xpath("//input[@id='verificationDelivery']")));
-        clickOn(getWebElement(By.xpath("//input[@id='verificationLicenseTime']")));
-
-        sendDataToInput(getWebElement(By.xpath("//input[@id='insurancePolicyNo' and "
-                        + "@placeholder='Enter Insurance Policy Number']")),
-                getFaker().number().digits(12), null, getStepThreeFormScroll());
-
-        Setup.getWait().thread(500);
-
-        sendDataToInput(getWebElement(By.xpath("//input[@id='insuranceCertificateCompany' and "
-                        + "@placeholder='Enter Company name']")),
-                getFaker().name().firstName(), null, getStepThreeFormScroll());
-
-        Setup.getWait().thread(500);
-
+    public void introduceDate() {
         Date date = new Date();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -60,11 +106,10 @@ public class DrivingRequirementsPage extends TabsPage {
         DateFormat short_date = DateFormat.getDateInstance(DateFormat.SHORT);
 
         //From Date
-        String by = "//input[@id='insuranceEffectiveDate' and "
-                + "@placeholder='Select Date']";
-        Setup.getActions().moveToElement(getWebElement(By.xpath(by))).build().perform();
-        Setup.getActions().click(getWebElement(By.xpath(by))).build().perform();
-        Setup.getActions().sendKeys(getWebElement(By.xpath(by)), short_date.format(getFaker().date().between(past_date, date)).toString())
+        String by = "insuranceEffectiveDate";
+        Setup.getActions().moveToElement(getWebElement(By.id(by))).build().perform();
+        Setup.getActions().click(getWebElement(By.id(by))).build().perform();
+        Setup.getActions().sendKeys(getWebElement(By.id(by)), short_date.format(getFaker().date().between(past_date, date)).toString())
                 .build().perform();
         //Date here
         int min_val = 1;
@@ -80,46 +125,17 @@ public class DrivingRequirementsPage extends TabsPage {
         Date future_date = calendar.getTime();
 
         try {
-            by = "//input[@id='insuranceExpirationDate' and "
-                    + "@placeholder='Select Date']";
-            Setup.getActions().moveToElement(getWebElement(By.xpath(by))).build().perform();
-            Setup.getActions().click(getWebElement(By.xpath(by))).build().perform();
-            Setup.getActions().sendKeys(getWebElement(By.xpath(by)), short_date.format(future_date).toString())
-                    .build().perform();
-            manageDate(false, randomNum);
+            by = "insuranceExpirationDate";
+            Setup.getActions().moveToElement(getWebElement(By.id(by))).build().perform();
+            Setup.getActions().click(getWebElement(By.id(by))).build().perform();
+            //Setup.getActions().sendKeys(getWebElement(By.id(by)), short_date.format(future_date).toString()).build().perform();
+            //manageDate(false, randomNum);
+            Setup.getActions().sendKeys("12/29/2021").build().perform();
+            Setup.getActions().sendKeys(Keys.ENTER);
+
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
-
-        Setup.getWait().thread(500);
-
-        sendDataToInput(getWebElement(By.xpath("//input[@id='insuranceRenewal' and "
-                        + "@placeholder='Enter Insurance Renewal']")),
-                getFaker().name().firstName(), null, getStepThreeFormScroll());
-
-        Setup.getWait().thread(500);
-
-        sendDataToInput(getWebElement(By.xpath("//input[@id='licensePlateNo' and "
-                        + "@placeholder='Enter Vehicle License Plate Number']")),
-                getFaker().number().digits(6), null, getStepThreeFormScroll());
-
-        Setup.getWait().thread(500);
-
-        managePlateState();
-
-        scrollToWebElement(null, getStepThreeFormScroll());
-
-        Setup.getWait().thread(500);
-
-        setImage(getWebElement(By.xpath("//label[@title='License Plate Photo']/ancestor::div[contains(@class, "
-                + "'ant-form-item')]/descendant::input[@type='file']")), null);
-
-        Setup.getWait().thread(500);
-
-        setImage(getWebElement(By.xpath("//label[@title='Vehicle Registration Sticker']/ancestor::div[contains(@class, "
-                + "'ant-form-item')]/descendant::input[@type='file']")), null);
-
-        Setup.getWait().thread(500);
     }
 
     private void manageDate(boolean back, int random_num) {
@@ -152,7 +168,7 @@ public class DrivingRequirementsPage extends TabsPage {
         String xpath = "//input[@id='licensePlateStateIssuedId']/ancestor::div[@class='ant-form-item-control-input']";
 
         sendDataToInput(getWebElement(By.xpath(xpath)),
-                null, Keys.SPACE, getStepThreeFormScroll());
+                null, Keys.SPACE, getStepThreeForm());
 
         List<WebElement> states = getWebElements(By.xpath("//div[@class='ant-select-item ant-select-item-option']"));
 
@@ -167,5 +183,30 @@ public class DrivingRequirementsPage extends TabsPage {
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
+    }
+
+    private void checkVehicleLicensePlateComponentBehaviour() {
+        waitForSpinningElementDissapear();
+        try {
+            Setup.getWait().thread(150);
+            clickOn(getWebElement(getVehicleLicensePlateLocator));
+            Setup.getWait().thread(150);
+            Assert.assertNotNull("Vehicle License Plate not found or none to show", getPageElementBy(By.xpath(
+                    "//div[@class='rc-virtual-list-holder-inner']")));
+            WebElement vehicle_plate_list = getPageElementBy(By.xpath("//div[@class='rc-virtual-list-holder-inner']"));
+            List<WebElement> element_list = vehicle_plate_list.findElements(By.xpath(
+                    "//div[@class='ant-select-item ant-select-item-option']"));
+            int val = element_list.size();
+            if (element_list.size() > 3)
+                val = 0;
+            int number = (int) (Math.random() * val + 1);
+            hoverElement(null, element_list.get(number));
+            clickOn(element_list.get(number));
+            //Setup.getWait().thread(150);
+        } catch(Exception e) {}
+    }
+
+    public boolean systemOpensAddVehicleView() {
+        return true;
     }
 }
