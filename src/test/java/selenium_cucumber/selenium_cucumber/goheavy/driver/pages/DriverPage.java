@@ -30,7 +30,6 @@ public class DriverPage extends PageObject {
 	private String driver_zipCode="//input[@placeholder='Enter ZIP Code']";
 	private String driver_City="//input[@placeholder='Enter City']";
 	private String driver_Country="//input[@id='addressCountryId']";
-	private String driver_LicenseNumber="//input[@placeholder='Enter DL number']";
 	private String vehicles = "//span[@class='anticon anticon-car' and @aria-label='car' and @cursor='pointer']";
 
 	public DriverPage() {
@@ -65,7 +64,7 @@ public class DriverPage extends PageObject {
 		AddDriverTitle = addDriverTitle;
 	}
 	public String getUpdateBtn(){return updateBtn;}
-	private String getDriver_LicenseNumber() {
+	/*private String getDriver_LicenseNumber() {
 		return driver_LicenseNumber;
 	}
 	private void setDriver_LicenseNumber(String driver_LicenseNumber) {
@@ -74,7 +73,7 @@ public class DriverPage extends PageObject {
 
 	private String getDriver_Photo() {
 		return AddDriverTitle;
-	}
+	}*/
 	private void setDriver_Photo(String driver_Photo) {
 		driver_Photo = driver_Photo;
 	}
@@ -290,7 +289,8 @@ public class DriverPage extends PageObject {
 			CheckUploadImageComponent("(//input[@type='file'])[2]","//span[text()='Add']");
 			CheckUploadImageComponent("(//input[@type='file'])[3]","//span[text()='Add']");
 
-			sendDataToInput(getWebElement(By.xpath(driver_LicenseNumber)), getFaker().number().digits(7), null);
+			//Driver's License (DL) Number
+			sendDataToInput(getWebElement(By.xpath("//input[@placeholder='Enter DL number']")), getFaker().number().digits(7), null);
 
 			//Dl Issue Date
 			Setup.getActions().moveToElement(getWebElement(By.xpath("//input[@id='dlIssuedDate']"))).build().perform();
@@ -375,20 +375,29 @@ public class DriverPage extends PageObject {
 		try {
 			waitForSpinningElementDissapear();
 			waitAddittionalTime();
-			
-			String class_value = "ant-tag ant-tag-blue";
+			waitAddittionalShortTime();
+			String class_value;
+			if (status.equals("Clear"))
+				class_value = "ant-tag ant-tag-green";
+			else if (status.equals("GoHeavy Ready"))
+				class_value = "ant-tag ant-tag-geekblue";
+			else
+				class_value = "ant-tag ant-tag-blue";
 
-			Setup.getActions().sendKeys(getWebElement(By.xpath(""
-					+ "//input[@placeholder='Search...' and @type='text' and @class='ant-input']")), 
+			/*if (Boolean.valueOf(Setup.getValueStore("clearDriver").toString())) {
+				status = "Clear";
+				class_value = "ant-tag ant-tag-green";
+			}*/
+
+			Setup.getActions().sendKeys(getWebElement(By.xpath("//input[@placeholder='Search...' and @type='text' and @class='ant-input']")),
 					(String) Setup.getValueStore("driverName")).build().perform();
-			
+
 			Setup.getWait().thread(500);
-			
-			Setup.getActions().click(getWebElement(By.xpath(""
-					+ "//button[@class='ant-btn ant-btn-icon-only ant-input-search-button']"))).build().perform();
-			
+
+			Setup.getActions().click(getWebElement(By.xpath("//button[@class='ant-btn ant-btn-icon-only ant-input-search-button']"))).build().perform();
+
 			Setup.getWait().thread(1000);
-			
+
 			String status_xpath = "//span[@class='" + class_value + "' and text()='" + status + "']";
 			WebElement element = getWebElement(By.xpath(status_xpath));
 
@@ -506,10 +515,12 @@ public class DriverPage extends PageObject {
 	public boolean searchForAddedDriver(String driver_email) {
 		waitForSpinningElementDissapear();
 		try {
+			if (driver_email.equals(Setup.getDriver().findElement(By.xpath(driver_email)).getAttribute("value"))){
 			Setup.getActions().sendKeys(Setup.getDriver().findElement(By.xpath("//input[@placeholder='Search...' and @type='text' and @class='ant-input']")), driver_email).build().perform();
 			Setup.getActions().click(Setup.getDriver().findElement(By.xpath("//button[@class=\"ant-btn ant-btn-icon-only ant-input-search-button\"]"))).build().perform();
 			waitForSpinningElementDissapear();
 			return true;
+			} else return false;
 		} catch(Exception e) {
 			System.out.println(e.getMessage());
 			return false;

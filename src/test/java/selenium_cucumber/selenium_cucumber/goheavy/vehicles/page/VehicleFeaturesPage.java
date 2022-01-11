@@ -65,6 +65,7 @@ public class VehicleFeaturesPage extends TabsPage {
 
         sendDataToInput(getWebElement(By.id("transmission")),
                 getFaker().name().firstName(), null, getStepTwoFormScroll());
+
         if (min_val < 145)
             clickOn(getWebElement(By.xpath("//label[@title='Towing Kit Installed']/ancestor::" +
                     "div[@class='ant-row ant-form-item']/descendant::button[@type='button']")));
@@ -73,10 +74,11 @@ public class VehicleFeaturesPage extends TabsPage {
             clickOn(getWebElement(By.xpath("//label[@title='Liftgate Installed']/ancestor::" +
                     "div[@class='ant-row ant-form-item']/descendant::button[@type='button']")));
 
+        setImage(getWebElement(By.xpath(getVehiclePhotoImageXpath())), null);
+
         scrollToWebElement(null, getStepTwoFormScroll());
 
-        CheckUploadImageComponent(uploadInputButton,uploadNextButton);
-
+        clickOn(getWebElement(By.xpath("//button[@type='submit']/descendant::span[text()='Next']")));
         waitForSpinningElementDissapear();
         Setup.getWait().thread(1500);
     }

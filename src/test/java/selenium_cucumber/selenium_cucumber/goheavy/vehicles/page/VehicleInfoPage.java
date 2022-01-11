@@ -281,15 +281,13 @@ public class VehicleInfoPage extends TabsPage {
     public void insertValidData() {
 
         sendDataToInput(getWebElement(By.id(getVINInputID())), getFaker().number().digits(17), null, getFormScroll());
-        String VIN = Setup.getDriver().findElement(By.id(getVINInputID())).getText();
 
-        checkVehicleTypeComponentBehaviour();
         String vehicleMake = getFaker().superhero().name();
         Setup.setKeyValueStore("vehicleMake", vehicleMake);
 
         sendDataToInput(getWebElement(By.id(getVehicleMakeID())), (String) Setup.getValueStore("vehicleMake"), null,
                 getFormScroll());
-        //checkVehicleTypeComponentBehaviour();
+        checkVehicleTypeComponentBehaviour();
         int min_val = 1995;
         int max_val = 2018;
 
@@ -305,12 +303,8 @@ public class VehicleInfoPage extends TabsPage {
         randomNum = tlr.nextInt(min_val, max_val + 1);
         sendDataToInput(getWebElement(By.id(getVehiclePayloadID())), String.valueOf(randomNum), null, getFormScroll());
         scrollToWebElement(null, getFormScroll());
-        //Hago la llamada al metodo despues de rellenar el formulario para que no de conflicto con los campos requeridos vacios
-        CheckUploadImageComponent(getUploadInputButton(), getNextBtn());
 
-        //clickOn(getWebElement(By.xpath("//button[@type='submit']/descendant::span[text()='Next']")));
-
-
+        clickOn(getWebElement(By.xpath("//button[@type='submit']/descendant::span[text()='Next']")));
         waitForSpinningElementDissapear();
         Setup.getWait().thread(1500);
 

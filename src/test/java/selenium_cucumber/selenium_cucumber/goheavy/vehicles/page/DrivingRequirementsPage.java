@@ -5,9 +5,12 @@ import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import selenium_cucumber.selenium_cucumber.general.InputType;
 import selenium_cucumber.selenium_cucumber.general.Setup;
 
 import java.text.DateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -54,7 +57,9 @@ public class DrivingRequirementsPage extends TabsPage {
     }
 
     public void insertValidData() {
-        //setImage(getWebElement(By.xpath(getVehicleInsuranceImageXpath())), null);
+        String formId = "step-three-form";
+
+        setImage(getWebElement(By.xpath(getVehicleInsuranceImageXpath())), null);
 
         clickOn(getWebElement(By.id("verificationDelivery")));
         clickOn(getWebElement(By.id("verificationLicenseTime")));
@@ -69,12 +74,28 @@ public class DrivingRequirementsPage extends TabsPage {
 
         Setup.getWait().thread(500);
 
-        introduceDate();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        String date_compare = dtf.format(LocalDateTime.now());
+        String date_compared = dtf.format(LocalDateTime.now().plusYears(1));
+
+        sendDataToInputImproved("Insurance Effective Date", date_compare.toString(), null,
+                InputType.input, true, formId, 40);
+        Setup.getWait().thread(1000);
+        sendDataToInputImproved("Insurance Effective Date", null, Keys.RETURN,
+                InputType.input, true, formId, 40);
+        Setup.getWait().thread(1000);
+
+        try {
+            sendDataToInputImproved("Insurance Expiration Date", date_compared.toString(), null,
+                    InputType.input, true, formId, 40);
+            sendDataToInputImproved("Insurance Expiration Date", null, Keys.RETURN,
+                    InputType.input, true, formId, 40);
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
 
         Setup.getWait().thread(500);
 
-        Setup.getActions().moveToElement(getWebElement(By.id("insuranceRenewal"))).build().perform();
-        Setup.getActions().click(getWebElement(By.id("insuranceRenewal")));
         sendDataToInput(getWebElement(By.id("insuranceRenewal")),
                 getFaker().name().firstName(), null, getStepThreeForm());
 
@@ -82,6 +103,7 @@ public class DrivingRequirementsPage extends TabsPage {
 
         sendDataToInput(getWebElement(By.id("licensePlateNo")),
                 getFaker().number().digits(6), null, getStepThreeForm());
+
         Setup.getWait().thread(500);
 
         managePlateState();
@@ -90,9 +112,19 @@ public class DrivingRequirementsPage extends TabsPage {
 
         Setup.getWait().thread(500);
 
-        CheckUploadImageComponent(uploadInputButton_CICP, doneButton);
-        CheckUploadImageComponent(uploadInputButton_LPP, doneButton);
-        CheckUploadImageComponent(uploadInputButton_VRS, doneButton);
+        setImage(getWebElement(By.xpath("//label[@title='License Plate Photo']/ancestor::div[contains(@class, "
+                + "'ant-form-item')]/descendant::input[@type='file']")), null);
+
+        Setup.getWait().thread(500);
+
+        setImage(getWebElement(By.xpath("//label[@title='Vehicle Registration Sticker']/ancestor::div[contains(@class, "
+                + "'ant-form-item')]/descendant::input[@type='file']")), null);
+
+        Setup.getWait().thread(500);
+
+        clickOn(getWebElement(By.xpath("//button[@type='submit']/descendant::span[text()='Done']")));
+        waitForSpinningElementDissapear();
+        Setup.getWait().thread(1500);
     }
 
 

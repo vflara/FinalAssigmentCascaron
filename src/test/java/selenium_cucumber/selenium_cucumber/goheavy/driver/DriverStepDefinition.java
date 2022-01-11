@@ -25,12 +25,14 @@ public class DriverStepDefinition {
 		driverSteps.user_inserts_valid_data_add();
 	}
 
-	@Given("User Add a \"Vehicle\"")
-	public void user_add_a_vehicle() {
+	@Given("User Add a {string}")
+	public void user_add_a_vehicle(String status) {
 		driverSteps.user_search_for_added_driver(email);
 		driverSteps.userClicksOnVehicles();
 		vehicleStep.userClicksOnAddVehicleButton();
+		vehicleStep.hoverOverImageComponent();
 		vehicleStepDefinition.the_user_inserts_valid_data_and_clicks_done_button();
+		driverSteps.system_creates_driver_on_status(status);
 	}
 	@Given("User go to {string}")
 	public void userGoToDocuments(String documents) {

@@ -26,7 +26,7 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("unused")
 public class VehiclePage extends PageObject {
     private String vehiclesLiXpath;
-    private String addVehicleButtonXpath;
+    private String addVehicleButtonXpath = "//span[text()='Add Vehicle']/ancestor::button[@type='button' and @class='ant-btn ant-btn-primary']";
     private String addVehicleTitleXpath;
     private String carIconXpath;
     private String stepBaseXpath;
@@ -185,7 +185,7 @@ public class VehiclePage extends PageObject {
         try {
             waitForSpinningElementDissapear();
             Setup.getWait().thread(1000);
-            clickOnElement(getWebElement(By.xpath("//span[text()='Add Vehicle']/ancestor::button[@type='button' and @class='ant-btn ant-btn-primary']")), true);
+            clickOnElement(getWebElement(By.xpath(getAddVehicleButtonXpath())), true);
             return true;
         } catch(Exception e) {
             System.out.println(e.getMessage());
@@ -394,21 +394,6 @@ public class VehiclePage extends PageObject {
         waitForSpinningElementDissapear();
         try {
             setImage(getWebElement(By.xpath(getVINImageUploadItemXpath())), null);
-            Setup.getWait().thread(300);
-            Setup.getActions().moveToElement(getWebElement(By.xpath("//div[contains(@class, 'kxeirt')]/descendant::img")))
-                    .build().perform();
-            Setup.getWait().thread(300);
-
-            assertTrue(hoverElement(By.xpath("//span[@role='img' and @class='anticon anticon-eye' and @cursor='pointer']")
-                    , null));
-            clickOn(getWebElement(By.xpath("//span[@role='img' and @class='anticon anticon-eye' and @cursor='pointer']")));
-            clickOn(getWebElement(By.xpath("//span[@class='anticon anticon-close ant-modal-close-icon' and @role='img']")));
-            assertTrue(hoverElement(By.xpath("//span[@role='img' and @class='anticon anticon-check' and @cursor='pointer']")
-                    , null));
-            clickOn(getWebElement(By.xpath("//span[@role='img' and @class='anticon anticon-check' and @cursor='pointer']")));
-            assertTrue(hoverElement(By.xpath("//span[@role='img' and @class='anticon anticon-close' and @cursor='pointer']")
-                    , null));
-
             return true;
         } catch (Exception e) {
             Assert.fail("Expected Image Over element not found");
